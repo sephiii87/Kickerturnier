@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="/kickerturnier/">
+<title>roXtra Tischkickerturnier 2026</title>
+<style>
+  :root{
+    --bg:#071528; --card:#0e2746; --line:#1c3f68; --txt:#e8eef7;
+    --muted:#8fa6c4; --accent:#1f8bff; --gold:#ffc83d; --green:#2fd18a; --red:#ff5d6c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45}
+  header{background:#0a1c33;border-bottom:3px solid var(--accent)}
+  header img{display:block;width:100%;max-width:960px;margin:0 auto}
+  .subbar{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;
+          padding:12px 16px;background:#0c2342;border-bottom:1px solid var(--line);
+          font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .subbar b{color:var(--accent);font-size:15px}
+  .subbar span{opacity:.5}
+  main{max-width:1150px;margin:0 auto;padding:24px 16px 60px}
+  h2{margin:34px 0 12px;font-size:20px;border-left:4px solid var(--accent);padding-left:10px}
+  .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(460px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .card h3{margin:0;padding:12px 16px;background:#143257;font-size:16px;
+           border-left:4px solid var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:#102c4e;color:var(--muted);font-weight:600;font-size:12px;
+     text-transform:uppercase;letter-spacing:.4px}
+  tbody tr:last-child td{border-bottom:none}
+  td.team{text-align:left}
+  .teamcell{display:flex;align-items:center;gap:10px}
+  .teamcell img{width:34px;height:34px;object-fit:contain;border-radius:6px;background:#ffffff14;flex:0 0 auto}
+  .tname{font-weight:600}
+  .players{font-size:11.5px;color:var(--muted)}
+  .pts{font-weight:700;color:var(--accent)}
+  .pos{color:var(--muted);width:28px}
+  tr.q1 .pos,tr.q2 .pos{color:var(--accent);font-weight:700}
+  tr.q1,tr.q2{background:#1f8bff14}
+  .sched td{text-align:left}
+  .sched td.sc{text-align:center;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+  .sched tr.open td.sc{color:var(--muted);font-weight:400}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;
+       background:#1b3f68;color:var(--muted);white-space:nowrap}
+  .tag.ko{background:var(--accent);color:#06192e;font-weight:700}
+  .win{color:var(--green)} .lose{color:var(--red)}
+  .ko-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .match{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .match.final{border-color:var(--gold);box-shadow:0 0 0 1px #ffc83d33}
+  .match h4{margin:0 0 10px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .match .row{display:flex;align-items:center;gap:10px;padding:6px 0}
+  .match .row img{width:30px;height:30px;object-fit:contain;border-radius:6px;background:#ffffff14}
+  .match .row .n{flex:1}
+  .match .row .g{font-weight:800;font-size:18px;min-width:26px;text-align:right}
+  .champ{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);
+         text-align:center;color:var(--gold);font-weight:700}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+  @media(max-width:560px){.players{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="header.png" alt="roXtra Kickerturnier 2026 – Team. Spiel. Spass.">
+</header>
+<div class="subbar">
+  <b>2026</b><span>&bull;</span>Gruppenphase<span>&bull;</span>Halbfinale<span>&bull;</span>Finale
+</div>
+
+<main>
+  <h2>Tabellen</h2>
+  <div class="grid" id="tabellen"></div>
+
+  <h2>K.-o.-Phase</h2>
+  <div class="ko-grid" id="ko"></div>
+
+  <h2>Spielplan</h2>
+  <div class="card">
+    <table class="sched">
+      <thead><tr><th style="text-align:left">Termin</th><th style="text-align:left">Phase</th>
+      <th style="text-align:left">Begegnung</th><th>Ergebnis</th></tr></thead>
+      <tbody id="spielplan"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>Ergebnisse im &lt;script&gt;-Block dieser Datei pflegen.</footer>
+
+<script>
+/* =========================================================================
+   1) TEAMS  –  logo = Dateiname im selben Ordner; fehlt die Datei => default.png
+   ========================================================================= */
+const TEAMS = [
+  { gruppe:"A", name:"Fußballhörnchen",                     p1:"Tobi",     p2:"Micha",    logo:"fussballhoernchen.png" },
+  { gruppe:"A", name:"Merge Conflict",                      p1:"Tim",      p2:"Matze",    logo:"Merge-conflict.png"    },
+  { gruppe:"A", name:"RosaSee",                             p1:"Kevin",    p2:"Julia",    logo:"rosasee.png"           },
+  { gruppe:"A", name:"Tomvoll Attack",                      p1:"Stummi",   p2:"Michi",    logo:"tomvoll-attack.png"    },
+  { gruppe:"A", name:"Hopfentornado",                       p1:"Andreas",  p2:"Viktor",   logo:"hopfentornado.png"     },
+  { gruppe:"B", name:"Alpha & Omega",                       p1:"Otto",     p2:"Alex",     logo:"alpha-omega.png"       },
+  { gruppe:"B", name:"Aus Versehen",                        p1:"Doro",     p2:"Inka",     logo:"aus-versehen.png"      },
+  { gruppe:"B", name:"Ministerium für geheime Tätigkeiten", p1:"Phillip",  p2:"Benjamin", logo:"ministerium.png"       },
+  { gruppe:"B", name:"Kickstarter",                         p1:"Philemon", p2:"Michi",    logo:"kickstarter.png"       },
+  { gruppe:"B", name:"Sgladschdglei",                       p1:"Steffen",  p2:"Luca",     logo:"sgladschdglei.png"     },
+];
+
+/* =========================================================================
+   2) SPIELPLAN  –  HIER ERGEBNISSE EINTRAGEN
+      t1 / t2 = Tore.  gespielt:true => das Spiel zählt für die Tabelle.
+   ========================================================================= */
+const SPIELE = [
+  { tag:"Dienstag",   datum:"06.10.2026 12:30", phase:"Gruppe A", a:"RosaSee",         b:"Hopfentornado",                       t1:4, t2:10, gespielt:true  },
+  { tag:"Mittwoch",   datum:"07.10.2026 12:30", phase:"Gruppe A", a:"Fußballhörnchen", b:"Merge Conflict",                      t1:0, t2:0,  gespielt:false },
+  { tag:"Donnerstag", datum:"08.10.2026 12:30", phase:"Gruppe A", a:"Fußballhörnchen", b:"RosaSee",                             t1:0, t2:0,  gespielt:false },
+  { tag:"Dienstag",   datum:"13.10.2026 12:30", phase:"Gruppe A", a:"Tomvoll Attack",  b:"Hopfentornado",                       t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"14.10.2026 12:30", phase:"Gruppe B", a:"Alpha & Omega",   b:"Aus Versehen",                        t1:0, t2:0,  gespielt:false },
+  { tag:"Donnerstag", datum:"15.10.2026 12:30", phase:"Gruppe B", a:"Alpha & Omega",   b:"Ministerium für geheime Tätigkeiten", t1:0, t2:0,  gespielt:false },
+  { tag:"Dienstag",   datum:"20.10.2026 12:30", phase:"Gruppe A", a:"RosaSee",         b:"Tomvoll Attack",                      t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"21.10.2026 12:30", phase:"Gruppe A", a:"Fußballhörnchen", b:"Hopfentornado",                       t1:0, t2:0,  gespielt:false },
+  { tag:"Donnerstag", datum:"22.10.2026 12:30", phase:"Gruppe A", a:"Fußballhörnchen", b:"Tomvoll Attack",                      t1:0, t2:0,  gespielt:false },
+  { tag:"Dienstag",   datum:"27.10.2026 12:30", phase:"Gruppe B", a:"Alpha & Omega",   b:"Kickstarter",                         t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"28.10.2026 12:30", phase:"Gruppe B", a:"Aus Versehen",    b:"Ministerium für geheime Tätigkeiten", t1:0, t2:0,  gespielt:false },
+  { tag:"Donnerstag", datum:"29.10.2026 12:30", phase:"Gruppe B", a:"Ministerium für geheime Tätigkeiten", b:"Kickstarter",     t1:0, t2:0,  gespielt:false },
+  { tag:"Dienstag",   datum:"03.11.2026 12:30", phase:"Gruppe B", a:"Alpha & Omega",   b:"Sgladschdglei",                       t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"04.11.2026 12:30", phase:"Gruppe A", a:"Merge Conflict",  b:"RosaSee",                             t1:0, t2:0,  gespielt:false },
+  { tag:"Donnerstag", datum:"05.11.2026 12:30", phase:"Gruppe B", a:"Ministerium für geheime Tätigkeiten", b:"Sgladschdglei",   t1:0, t2:0,  gespielt:false },
+  { tag:"Dienstag",   datum:"10.11.2026 12:30", phase:"Gruppe B", a:"Kickstarter",     b:"Sgladschdglei",                       t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"11.11.2026 12:30", phase:"Gruppe B", a:"Aus Versehen",    b:"Kickstarter",                         t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"18.11.2026 12:30", phase:"Gruppe A", a:"Merge Conflict",  b:"Tomvoll Attack",                      t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"25.11.2026 12:30", phase:"Gruppe B", a:"Aus Versehen",    b:"Sgladschdglei",                       t1:0, t2:0,  gespielt:false },
+  { tag:"Mittwoch",   datum:"02.12.2026 12:30", phase:"Gruppe A", a:"Merge Conflict",  b:"Hopfentornado",                       t1:0, t2:0,  gespielt:false },
+];
+
+/* =========================================================================
+   3) K.-O.-PHASE  –  Teams ergeben sich automatisch aus den Tabellen.
+      Nur Tore + gespielt pflegen.
+   ========================================================================= */
+const KO = {
+  hf1:    { tag:"Donnerstag", datum:"03.12.2026 12:30", titel:"Halbfinale 1 · Sieger A – Zweiter B", t1:0, t2:0, gespielt:false },
+  hf2:    { tag:"Dienstag",   datum:"08.12.2026 12:30", titel:"Halbfinale 2 · Sieger B – Zweiter A", t1:0, t2:0, gespielt:false },
+  platz3: { tag:"Mittwoch",   datum:"09.12.2026 12:30", titel:"Spiel um Platz 3",                    t1:0, t2:0, gespielt:false },
+  finale: { tag:"Donnerstag", datum:"10.12.2026 12:30", titel:"Finale",                              t1:0, t2:0, gespielt:false },
+};
+
+/* ======================= ab hier nichts mehr ändern ====================== */
+
+const DEFAULT_LOGO = "default.png";
+// Spielplan-CSV enthielt Soft Hyphens in Teamnamen - daher beim Abgleich entfernen
+const norm = s => (s||"").replace(/\u00ad/g,"").trim().toLowerCase();
+const byName = new Map(TEAMS.map(t => [norm(t.name), t]));
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function logoSrc(name){
+  const t = byName.get(norm(name));
+  return t && t.logo ? t.logo : DEFAULT_LOGO;
+}
+function logoImg(name){
+  return `<img src="${esc(logoSrc(name))}" alt="" loading="lazy"
+           onerror="this.onerror=null;this.src='${DEFAULT_LOGO}'">`;
+}
+function teamCell(name, withPlayers){
+  const t = byName.get(norm(name));
+  const label = t ? t.name : name;
+  const pl = (t && withPlayers) ? `<div class="players">${esc(t.p1)} &amp; ${esc(t.p2)}</div>` : "";
+  return `<div class="teamcell">${logoImg(label)}<div><div class="tname">${esc(label)}</div>${pl}</div></div>`;
+}
+
+function tabelle(gruppe){
+  const rows = new Map();
+  TEAMS.filter(t => t.gruppe === gruppe).forEach(t =>
+    rows.set(norm(t.name), { team:t, sp:0, s:0, u:0, n:0, tore:0, gegen:0, pkt:0 }));
+
+  SPIELE.filter(m => m.gespielt && m.phase === "Gruppe " + gruppe).forEach(m => {
+    const A = rows.get(norm(m.a)), B = rows.get(norm(m.b));
+    if(!A || !B) return;
+    A.sp++; B.sp++;
+    A.tore += m.t1; A.gegen += m.t2;
+    B.tore += m.t2; B.gegen += m.t1;
+    if(m.t1 > m.t2){ A.s++; B.n++; A.pkt += 3; }
+    else if(m.t1 < m.t2){ B.s++; A.n++; B.pkt += 3; }
+    else { A.u++; B.u++; A.pkt++; B.pkt++; }
+  });
+
+  return [...rows.values()].sort((x,y) =>
+    y.pkt-x.pkt || (y.tore-y.gegen)-(x.tore-x.gegen) || y.tore-x.tore ||
+    x.team.name.localeCompare(y.team.name,"de"));
+}
+
+function renderTabellen(){
+  document.getElementById("tabellen").innerHTML = ["A","B"].map(g => `
+    <div class="card">
+      <h3>Gruppe ${g}</h3>
+      <table>
+        <thead><tr><th></th><th style="text-align:left">Team</th>
+          <th>Sp</th><th>S</th><th>U</th><th>N</th><th>Tore</th><th>Diff</th><th>Pkt</th></tr></thead>
+        <tbody>
+        ${tabelle(g).map((r,i) => `
+          <tr class="${i<2 ? "q"+(i+1) : ""}">
+            <td class="pos">${i+1}</td>
+            <td class="team">${teamCell(r.team.name,true)}</td>
+            <td>${r.sp}</td><td>${r.s}</td><td>${r.u}</td><td>${r.n}</td>
+            <td>${r.tore}:${r.gegen}</td>
+            <td>${r.tore-r.gegen > 0 ? "+" : ""}${r.tore-r.gegen}</td>
+            <td class="pts">${r.pkt}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`).join("");
+}
+
+function sieger(m,a,b){ return m.gespielt ? (m.t1 >= m.t2 ? a : b) : null; }
+function verlierer(m,a,b){ return m.gespielt ? (m.t1 >= m.t2 ? b : a) : null; }
+
+function koTeam(key, side){
+  const A = tabelle("A"), B = tabelle("B");
+  const n = r => r ? r.team.name : null;
+  const hf1 = [n(A[0]) || "Sieger Gruppe A", n(B[1]) || "Zweiter Gruppe B"];
+  const hf2 = [n(B[0]) || "Sieger Gruppe B", n(A[1]) || "Zweiter Gruppe A"];
+  const map = {
+    hf1, hf2,
+    platz3: [verlierer(KO.hf1,hf1[0],hf1[1]) || "Verlierer HF1",
+             verlierer(KO.hf2,hf2[0],hf2[1]) || "Verlierer HF2"],
+    finale: [sieger(KO.hf1,hf1[0],hf1[1]) || "Sieger HF1",
+             sieger(KO.hf2,hf2[0],hf2[1]) || "Sieger HF2"],
+  };
+  return map[key][side === "a" ? 0 : 1];
+}
+
+function renderKo(){
+  document.getElementById("ko").innerHTML = Object.entries(KO).map(([k,m]) => {
+    const a = koTeam(k,"a"), b = koTeam(k,"b");
+    const w = m.gespielt ? (m.t1 > m.t2 ? a : m.t2 > m.t1 ? b : null) : null;
+    const row = (name,tore,win) => `
+      <div class="row ${win ? "win" : ""}">${logoImg(name)}
+        <span class="n">${esc(name)}</span>
+        <span class="g">${m.gespielt ? tore : "–"}</span></div>`;
+    return `<div class="match ${k === "finale" ? "final" : ""}">
+      <h4>${esc(m.titel)} &middot; ${esc(m.datum)}</h4>
+      ${row(a,m.t1,w===a)}${row(b,m.t2,w===b)}
+      ${k === "finale" && w ? `<div class="champ">Turniersieger: ${esc(w)}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function renderSpielplan(){
+  const all = [...SPIELE, ...Object.keys(KO).map(k => ({
+    tag:KO[k].tag, datum:KO[k].datum, phase:KO[k].titel.split(" · ")[0],
+    a:koTeam(k,"a"), b:koTeam(k,"b"),
+    t1:KO[k].t1, t2:KO[k].t2, gespielt:KO[k].gespielt, isKo:true
+  }))];
+
+  document.getElementById("spielplan").innerHTML = all.map(m => {
+    const cls = (x,y) => m.gespielt ? (x > y ? "win" : x < y ? "lose" : "") : "";
+    return `<tr class="${m.gespielt ? "" : "open"}">
+      <td><strong>${esc(m.tag)}</strong><br><span class="players">${esc(m.datum)}</span></td>
+      <td><span class="tag ${m.isKo ? "ko" : ""}">${esc(m.phase)}</span></td>
+      <td><div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <span class="${cls(m.t1,m.t2)}">${teamCell(m.a,false)}</span>
+            <span style="color:var(--muted)">vs.</span>
+            <span class="${cls(m.t2,m.t1)}">${teamCell(m.b,false)}</span>
+          </div></td>
+      <td class="sc">${m.gespielt ? m.t1 + " : " + m.t2 : "– : –"}</td>
+    </tr>`;
+  }).join("");
+}
+
+renderTabellen(); renderKo(); renderSpielplan();
+</script>
+</body>
+</html>
